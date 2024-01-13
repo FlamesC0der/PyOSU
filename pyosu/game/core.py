@@ -18,3 +18,14 @@ class Cursor(pygame.sprite.Sprite):
 
     def show(self):
         self.image.set_alpha(255)
+
+
+# temp
+def quit():
+    sound = pygame.mixer.Sound("game/resources/sounds/see_you_next_time.mp3")
+    s = sound.play()
+    while s.get_busy():
+        pygame.time.wait(10)
+
+    pygame.quit()
+    sys.exit()

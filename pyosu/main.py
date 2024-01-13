@@ -21,16 +21,18 @@ class Game():
         screen_info = pygame.display.Info()
         self.width, self.height = screen_info.current_w, screen_info.current_h
 
-        # self.screen = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
-        self.screen = pygame.display.set_mode((self.width, self.height), pygame.NOFRAME)
+        self.screen = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
+        # self.screen = pygame.display.set_mode((self.width, self.height), pygame.NOFRAME)
         self.clock = pygame.time.Clock()
         self.skin_manager = SkinManager("boop")
 
         self.cursor = Cursor(self.screen, self.skin_manager)
         self.is_Running = True
 
-        self.screens = {"IntroScreen": IntroScreen(self)}
+        self.screens = {"IntroScreen": IntroScreen(self), "MainMenu": 1}
         self.current_screen = "IntroScreen"
+
+        self.intro_showed = False
 
         pygame.display.set_caption("PyOSU")
         pygame.mouse.set_visible(False)
