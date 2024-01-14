@@ -13,7 +13,7 @@ class IntroScreen:
         self.game = game
         self.screen = game.screen
 
-        self.bg = pygame.Surface((game.width, game.height))
+        self.bg = pygame.Surface((self.game.width, self.game.height))
         self.bg.fill((0, 0, 0))
 
         self.bgs = [load_image(os.path.join(ROOT_DIR, f"game/resources/bg/{img}")) for img in
@@ -52,6 +52,7 @@ class IntroScreen:
         self.bg = pygame.transform.scale(self.bg, (self.game.width, self.game.height))
 
     def update(self):
+        self.game.cursor.show()
         current_time = pygame.time.get_ticks()
 
         if self.bg_timer + 15000 < current_time:

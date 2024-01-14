@@ -8,6 +8,7 @@ from pyosu.game.core import Cursor
 from pyosu.game.skin_manager import SkinManager
 
 # Screens
+from pyosu.game.screens.intro import Intro
 from pyosu.game.screens.introScreen import IntroScreen
 from pyosu.game.screens.MainMenu import MainMenu
 
@@ -30,9 +31,9 @@ class Game():
         self.cursor = Cursor(self.screen, self.skin_manager)
         self.is_Running = True
 
-        self.screens = {"IntroScreen": IntroScreen(self), "MainMenu": MainMenu(self)}
-        # self.current_screen = "IntroScreen"
-        self.current_screen = "MainMenu"
+        self.screens = {"Intro": Intro(self), "IntroScreen": IntroScreen(self), "MainMenu": MainMenu(self)}
+        self.current_screen = "Intro"
+        # self.current_screen = "MainMenu"
 
         self.intro_showed = False
 

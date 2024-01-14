@@ -10,7 +10,9 @@ from pyosu.log import logger
 class MainMenu:
     def __init__(self, game):
         self.game = game
-        self.screen = game.screen
+        self.screen = self.game.screen
+
+        self.intro_music_skipped = False
 
         self.bottom_buttons = [(self.game.skin_manager.get_skin(f"{b}"), self.game.skin_manager.get_skin(f"{b}-over"))
                                for b
@@ -18,7 +20,9 @@ class MainMenu:
 
         # Sprites
         self.songs = pygame.sprite.Group()
-        self.buttons = pygame.sprite.Group()
+        self.layer_1 = pygame.sprite.Group()
+
+        BackButton(self.layer_1, game=self.game)
 
         # temp
         self.song = Song(self.songs, game=self.game, name="Waldschrein", difficulty=10)
@@ -26,7 +30,7 @@ class MainMenu:
         self.bg = pygame.transform.scale(self.bg, (self.game.width, self.game.height))
 
         for i in range(len(self.bottom_buttons)):
-            BottomButton(self.buttons, buttons=self.bottom_buttons, game=self.game, index=i)
+            BottomButton(self.layer_1, buttons=self.bottom_buttons, game=self.game, index=i)
 
         logger.info("MainMenu screen Initialized")
 
@@ -36,8 +40,11 @@ class MainMenu:
                 self.game.change_screen("IntroScreen")
 
     def update(self):
+        if not self.intro_music_skipped:
+            self.game.intro_music.stop()
+
         self.songs.update()
-        self.buttons.update()
+        self.layer_1.update()
 
     def render(self, screen):
         # screen.fill((255, 255, 255))
@@ -46,13 +53,18 @@ class MainMenu:
 
         # Ui above
         pygame.draw.rect(screen, (0, 0, 0), (0, 0, self.game.width, 100))
+        pygame.draw.rect(screen, (0, 0, 0), (0, 100, 300, 100))
+        pygame.draw.polygon(screen, (0, 0, 0), ((300, 100), (400, 100), (300, 200)))
         pygame.draw.rect(screen, (0, 0, 0), (0, self.game.height - 100, self.game.width, self.game.height))
-        pygame.draw.line(screen, (0, 0, 255), (0, 100), (self.game.width, 100), 3)
+
+        pygame.draw.line(screen, (0, 0, 255), (0, 200), (300, 200), 3)
+        pygame.draw.line(screen, (0, 0, 255), (300, 200), (400, 100), 3)
+        pygame.draw.line(screen, (0, 0, 255), (400, 100), (self.game.width, 100), 3)
         pygame.draw.line(screen, (0, 0, 255), (0, self.game.height - 100), (self.game.width, self.game.height - 100), 3)
 
         self.songs.draw(screen)
 
-        self.buttons.draw(screen)
+        self.layer_1.draw(screen)
 
 
 class Song(pygame.sprite.Sprite):
@@ -64,10 +76,10 @@ class Song(pygame.sprite.Sprite):
         self.difficulty = difficulty
 
         self.image = self.game.skin_manager.get_skin("menu-button-background")
-        self.image = pygame.transform.scale(self.image, (724, 150))
+        self.image = pygame.transform.scale(self.image, (1000, 150))
         self.rect = self.image.get_rect()
 
-        self.rect.right = self.game.width + 100
+        self.rect.right = self.game.width + 400
         self.rect.y = self.game.height // 2
 
     def update(self):
@@ -93,9 +105,9 @@ class BottomButton(pygame.sprite.Sprite):
         self.image = self.original_image.copy()
 
         self.rect = self.image.get_rect()
-        self.rect.x = 317 + self.index * 77
+        self.rect.x = 367 + self.index * 77
         if self.index == 0:
-            self.rect.x = 300
+            self.rect.x = 350
         self.rect.y = self.game.height - 100
 
         self.last_click_time = 0
@@ -117,6 +129,38 @@ class BottomButton(pygame.sprite.Sprite):
             current_time = pygame.time.get_ticks()
             if self.rect.collidepoint(mouse_x, mouse_y):
                 if current_time - self.last_click_time >= self.cooldown_duration:
-                    self
+                    # todo create menu for each button
 
                     self.last_click_time = current_time
+
+
+class BackButton(pygame.sprite.Sprite):
+    def __init__(self, *groups, game):
+        super().__init__(*groups)
+
+        self.game = game
+
+        self.frames = [self.game.skin_manager.get_skin(f"menu-back-{i}") for i in range(8 + 1)]
+        self.current_frame_index = 0
+        self.frame = 0
+
+        self.image = self.frames[self.current_frame_index]
+        self.image = pygame.transform.scale(self.image, (250, 250))
+
+        self.rect = self.image.get_rect()
+        self.rect.x = 50
+        self.rect.bottom = self.game.height
+
+    def update(self):
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+
+        self.frame += 1
+        if self.frame >= 5:
+            self.current_frame_index = (self.current_frame_index + 1) % len(self.frames)
+            self.frame = 0
+        self.image = self.frames[self.current_frame_index]
+        self.image = pygame.transform.scale(self.image, (250, 250))
+
+        if pygame.mouse.get_pressed()[0]:
+            if self.rect.collidepoint(mouse_x, mouse_y):
+                self.game.change_screen("IntroScreen")
