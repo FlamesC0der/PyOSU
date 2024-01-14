@@ -10,7 +10,6 @@ from pyosu.log import logger
 
 class IntroScreen:
     def __init__(self, game):
-        logger.info("Screen: IntroScreen")
         self.game = game
         self.screen = game.screen
 
@@ -32,7 +31,7 @@ class IntroScreen:
 
         self.osu_button = OsuButton(self.sprites, game=self.game)
 
-        for i, button_img in enumerate(self.buttons):
+        for i in range(len(self.buttons)):
             MenuButton(
                 self.menu_buttons,
                 buttons=self.buttons,
@@ -40,6 +39,8 @@ class IntroScreen:
                 game=self.game,
                 osu_button=self.osu_button
             )
+
+        logger.info("IntroScreen screen Initialized")
 
     def handle_events(self, event):
         if event.type == pygame.KEYDOWN:

@@ -31,3 +31,7 @@ def quit(game):
 
     pygame.quit()
     sys.exit()
+
+
+def time_to_frame(ms):
+    return int(ms * 60 / 1000)

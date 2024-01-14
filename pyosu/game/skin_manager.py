@@ -1,5 +1,4 @@
 import pygame
-import pathlib
 import os
 
 from pyosu.settings import ROOT_DIR
