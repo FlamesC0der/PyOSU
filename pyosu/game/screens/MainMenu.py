@@ -23,6 +23,7 @@ class MainMenu:
         self.layer_1 = pygame.sprite.Group()
 
         BackButton(self.layer_1, game=self.game)
+        PlayButton(self.layer_1, game=self.game)
 
         # temp
         self.song = Song(self.songs, game=self.game, name="Waldschrein", difficulty=10)
@@ -47,7 +48,6 @@ class MainMenu:
         self.layer_1.update()
 
     def render(self, screen):
-        # screen.fill((255, 255, 255))
         screen.fill((0, 0, 0))
         screen.blit(self.bg, (0, 0))
 
@@ -113,6 +113,10 @@ class BottomButton(pygame.sprite.Sprite):
         self.last_click_time = 0
         self.cooldown_duration = 500
 
+        if self.index == 0:
+            self.mode = load_image(os.path.join(ROOT_DIR, "game/resources/sprites/mode_osu.png"))
+            self.mode = pygame.transform.scale(self.mode, (35, 35))
+
     def update(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
@@ -132,6 +136,9 @@ class BottomButton(pygame.sprite.Sprite):
                     # todo create menu for each button
 
                     self.last_click_time = current_time
+
+        if self.index == 0:
+            self.image.blit(self.mode, (30, 20))
 
 
 class BackButton(pygame.sprite.Sprite):
@@ -164,3 +171,39 @@ class BackButton(pygame.sprite.Sprite):
         if pygame.mouse.get_pressed()[0]:
             if self.rect.collidepoint(mouse_x, mouse_y):
                 self.game.change_screen("IntroScreen")
+
+
+class PlayButton(pygame.sprite.Sprite):
+    def __init__(self, *groups, game):
+        super().__init__(*groups)
+
+        self.game = game
+
+        self.image = load_image(os.path.join(ROOT_DIR, "game/resources/sprites/Osu.png"))
+        self.image = pygame.transform.scale(self.image, (300, 300))
+        self.original_image = self.image.copy()
+
+        self.rect = self.image.get_rect()
+        self.rect.centerx = self.game.width - 100
+        self.rect.centery = self.game.height - 50
+
+    def update(self):
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+
+        if self.rect.collidepoint(mouse_x, mouse_y):
+            self.image = pygame.transform.scale(self.original_image, (350, 350))
+        else:
+            current_size = self.image.get_size()
+
+            new_size = (
+                current_size[0] + 2,
+                current_size[1] + 2
+            )
+
+            if new_size[0] > 350:
+                new_size = self.original_image.get_size()
+            self.image = pygame.transform.scale(self.original_image, new_size)
+
+        self.rect = self.image.get_rect()
+        self.rect.centerx = self.game.width - 100
+        self.rect.centery = self.game.height - 50

@@ -24,8 +24,9 @@ class SkinManager:
 
         logger.info("Loaded skin assets")
 
-    def get_skin(self, image_name) -> pygame.Surface:
+    def get_skin(self, image_name) -> pygame.Surface | None:
         try:
             return self.assets[image_name]
         except IndexError as e:
             logger.error(f"Failed to get skin, {image_name}, \n {e}")
+            return None

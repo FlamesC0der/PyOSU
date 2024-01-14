@@ -22,7 +22,7 @@ class Cursor(pygame.sprite.Sprite):
 
 
 # temp
-def quit(game):
+def quit(game) -> None:
     game.intro_music.stop()
     sound = pygame.mixer.Sound("game/resources/sounds/see_you_next_time.mp3")
     s = sound.play()
@@ -33,5 +33,5 @@ def quit(game):
     sys.exit()
 
 
-def time_to_frame(ms):
+def time_to_frame(ms: int) -> int:
     return int(ms * 60 / 1000)

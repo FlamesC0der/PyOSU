@@ -3,7 +3,7 @@ import pygame
 from pyosu.log import logger
 
 
-def load_image(path: str, color_key=None):
+def load_image(path: str, color_key=None) -> pygame.Surface | None:
     try:
         image = pygame.image.load(path).convert()
 

@@ -87,18 +87,20 @@ class OsuButton(pygame.sprite.Sprite):
 
         self.opened = False
         self.last_click_time = 0
-        self.cooldown_duration = 500
 
         # Animation
 
     def update(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
+        current_time = pygame.time.get_ticks()
+
+        if current_time - self.last_click_time >= 10000:
+            self.opened = False
 
         if pygame.mouse.get_pressed()[0]:
-            current_time = pygame.time.get_ticks()
             if self.rect.collidepoint(mouse_x, mouse_y):
-                if current_time - self.last_click_time >= self.cooldown_duration:
-                    self.opened = not self.opened
+                if not self.opened:
+                    self.opened = True
 
                     self.last_click_time = current_time
 
@@ -151,6 +153,7 @@ class MenuButton(pygame.sprite.Sprite):
 
     def update(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
+        current_time = pygame.time.get_ticks()
 
         # Open/close
         if self.osu_button.opened:
@@ -174,7 +177,7 @@ class MenuButton(pygame.sprite.Sprite):
         # Onclick
         if pygame.mouse.get_pressed()[0] and self.osu_button.opened and not self.osu_button.rect.collidepoint(mouse_x,
                                                                                                               mouse_y):
-            if self.rect.collidepoint(mouse_x, mouse_y):
+            if self.rect.collidepoint(mouse_x, mouse_y) and current_time - self.osu_button.last_click_time >= 250:
                 self.osu_button.opened = False
                 if self.index == 0:
                     self.game.change_screen("MainMenu")

@@ -8,9 +8,10 @@ from pyosu.game.core import Cursor
 from pyosu.game.skin_manager import SkinManager
 
 # Screens
-from pyosu.game.screens.intro import Intro
-from pyosu.game.screens.introScreen import IntroScreen
+from pyosu.game.screens.Intro import Intro
+from pyosu.game.screens.IntroScreen import IntroScreen
 from pyosu.game.screens.MainMenu import MainMenu
+from pyosu.game.screens.Level import Level
 
 
 class Game():
@@ -31,11 +32,10 @@ class Game():
         self.cursor = Cursor(self.screen, self.skin_manager)
         self.is_Running = True
 
-        self.screens = {"Intro": Intro(self), "IntroScreen": IntroScreen(self), "MainMenu": MainMenu(self)}
+        self.screens = {"Intro": Intro(self), "IntroScreen": IntroScreen(self), "MainMenu": MainMenu(self),
+                        "Level": Level(self)}
         self.current_screen = "Intro"
         # self.current_screen = "MainMenu"
-
-        self.intro_showed = False
 
         pygame.display.set_caption("PyOSU")
         pygame.mouse.set_visible(False)
