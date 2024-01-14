@@ -9,6 +9,7 @@ from pyosu.game.skin_manager import SkinManager
 
 # Screens
 from pyosu.game.screens.introScreen import IntroScreen
+from pyosu.game.screens.MainMenu import MainMenu
 
 
 class Game():
@@ -29,8 +30,9 @@ class Game():
         self.cursor = Cursor(self.screen, self.skin_manager)
         self.is_Running = True
 
-        self.screens = {"IntroScreen": IntroScreen(self), "MainMenu": 1}
-        self.current_screen = "IntroScreen"
+        self.screens = {"IntroScreen": IntroScreen(self), "MainMenu": MainMenu(self)}
+        # self.current_screen = "IntroScreen"
+        self.current_screen = "MainMenu"
 
         self.intro_showed = False
 
@@ -42,6 +44,9 @@ class Game():
         # Welcome to osu sound
         sound = pygame.mixer.Sound(os.path.join(ROOT_DIR, "game/resources/sounds/welcome.mp3"))
         sound.play()
+
+        self.intro_music = pygame.mixer.Sound(os.path.join(ROOT_DIR, "game/resources/sounds/circles.mp3"))
+        self.intro_music.play(-1)
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -56,6 +61,7 @@ class Game():
     def change_screen(self, new_screen):
         if new_screen in self.screens:
             self.current_screen = new_screen
+            logger.info(f"changed screen to {new_screen}")
 
     def update(self):
         self.screens[self.current_screen].update()

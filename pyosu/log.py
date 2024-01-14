@@ -40,7 +40,7 @@ file_handler = logging.FileHandler(
     mode="w",
 )
 file_handler.setFormatter(
-    logging.Formatter("[%(asctime)s] %(levelname)-8s | %(module)-8s | %(message)s")
+    logging.Formatter("[%(asctime)s] %(levelname)-8s | %(module)-12s | %(message)s")
 )
 
 logger.addHandler(console_handler)

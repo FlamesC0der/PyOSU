@@ -1,6 +1,5 @@
 import pygame
 import os
-import sys
 import random
 
 from pyosu.settings import ROOT_DIR
@@ -45,7 +44,7 @@ class IntroScreen:
     def handle_events(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                quit()
+                quit(self.game)
 
     def change_bg(self):
         self.bg = random.choice(self.bgs)
@@ -82,9 +81,13 @@ class OsuButton(pygame.sprite.Sprite):
         self.rect.centerx = self.game.width // 2
         self.rect.centery = self.game.height // 2
 
+        self.mask = pygame.mask.from_surface(self.image)
+
         self.opened = False
         self.last_click_time = 0
         self.cooldown_duration = 500
+
+        # Animation
 
     def update(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -103,8 +106,8 @@ class OsuButton(pygame.sprite.Sprite):
             current_size = self.image.get_size()
 
             new_size = (
-                current_size[0] + 1,
-                current_size[1] + 1
+                current_size[0] + 2,
+                current_size[1] + 2
             )
 
             if new_size[0] > 650:
@@ -139,7 +142,10 @@ class MenuButton(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         self.rect.centerx = self.game.width // 2 + 200
-        self.rect.y = 250 + self.index * (ratio * 700 + 50)
+        self.rect.y = 250 + self.index * (ratio * 700 + 20)
+        self.mask = pygame.mask.from_surface(self.image)
+
+        # animation
 
     def update(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -153,7 +159,10 @@ class MenuButton(pygame.sprite.Sprite):
             self.hover_image.set_alpha(0)
 
         # Hold
-        if self.rect.collidepoint(mouse_x, mouse_y) and self.osu_button.opened:
+
+        if self.rect.collidepoint(mouse_x,
+                                  mouse_y) and self.osu_button.opened and not self.osu_button.rect.collidepoint(mouse_x,
+                                                                                                                mouse_y):
             self.image = self.hover_image
             self.rect.centerx = self.game.width // 2 + 250
         else:
@@ -161,11 +170,13 @@ class MenuButton(pygame.sprite.Sprite):
             self.rect.centerx = self.game.width // 2 + 200
 
         # Onclick
-        if pygame.mouse.get_pressed()[0] and self.osu_button.opened:
+        if pygame.mouse.get_pressed()[0] and self.osu_button.opened and not self.osu_button.rect.collidepoint(mouse_x,
+                                                                                                              mouse_y):
             if self.rect.collidepoint(mouse_x, mouse_y):
+                self.osu_button.opened = False
                 if self.index == 0:
                     self.game.change_screen("MainMenu")
                 if self.index == 1:
                     pass
                 if self.index == 2:
-                    quit()
+                    quit(self.game)

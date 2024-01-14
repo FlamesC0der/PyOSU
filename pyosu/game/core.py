@@ -1,4 +1,5 @@
 import pygame
+import sys
 
 
 class Cursor(pygame.sprite.Sprite):
@@ -21,7 +22,8 @@ class Cursor(pygame.sprite.Sprite):
 
 
 # temp
-def quit():
+def quit(game):
+    game.intro_music.stop()
     sound = pygame.mixer.Sound("game/resources/sounds/see_you_next_time.mp3")
     s = sound.play()
     while s.get_busy():
