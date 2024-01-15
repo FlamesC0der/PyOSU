@@ -14,7 +14,7 @@ class SkinManager:
 
         for asset in os.listdir(os.path.join(ROOT_DIR, f'skins/{self.skin_pack_name}')):
             if os.path.isfile(os.path.join(ROOT_DIR, f'skins/{self.skin_pack_name}/{asset}')):
-                name, extension = asset.split(".")
+                name, extension = asset.rsplit(".")
 
                 if extension in ["png", "PNG", "jpg", "jpeg"]:
                     self.assets[name] = load_image(

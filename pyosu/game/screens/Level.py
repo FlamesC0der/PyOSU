@@ -21,5 +21,6 @@ class Level:
     def update(self):
         pass
 
-    def render(self, screen):
+    def render(self, screen: pygame.Surface):
         pass
+        # screen.fill((0, 0, 0))

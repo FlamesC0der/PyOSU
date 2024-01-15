@@ -1,9 +1,11 @@
 import pygame
 import os
+import math
 
 from pyosu.settings import ROOT_DIR
 from pyosu.game.utils.fonts import render_text
 from pyosu.game.utils.image_loader import load_image
+from pyosu.game.level import get_levels
 from pyosu.log import logger
 
 
@@ -19,37 +21,85 @@ class MainMenu:
                                in ["selection-mode", "selection-mods", "selection-random", "selection-options"]]
 
         # Sprites
-        self.songs = pygame.sprite.Group()
+        self.song_list = pygame.sprite.Group()
         self.layer_1 = pygame.sprite.Group()
 
         BackButton(self.layer_1, game=self.game)
         PlayButton(self.layer_1, game=self.game)
 
-        # temp
-        self.song = Song(self.songs, game=self.game, name="Waldschrein", difficulty=10)
-        self.bg = load_image(os.path.join(ROOT_DIR, "songs/369354 Equilibrium - Waldschrein/folk folk folk folk.jpg"))
-        self.bg = pygame.transform.scale(self.bg, (self.game.width, self.game.height))
+        self.bg = pygame.Surface((self.game.width, self.game.height))
+        self.bg.fill((0, 0, 0))
+
+        # Song list
+        self.selected_song_index = 0
+        self.scroll_offset = 0
+        self.current_music = None
+
+        for level in get_levels():
+            for song_data in level["levels"]:
+                Song(self.song_list, game=self.game, name=song_data["name"], author=song_data["author"],
+                     bg=level["bg"], difficulty=song_data["data"]["OverallDifficulty"],
+                     difficulty_title=song_data["difficulty"],
+                     music=pygame.mixer.Sound(
+                         os.path.join(ROOT_DIR,
+                                      f"songs/{level['level_name']}/{song_data['data']['AudioFilename']}"))
+                     )
+
+        # Render bottom buttons
 
         for i in range(len(self.bottom_buttons)):
-            BottomButton(self.layer_1, buttons=self.bottom_buttons, game=self.game, index=i)
+            BottomButton(
+                self.layer_1,
+                buttons=
+                self.bottom_buttons,
+                game=self.game,
+                index=i
+            )
 
-        logger.info("MainMenu screen Initialized")
+            logger.info("MainMenu screen Initialized")
 
     def handle_events(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 self.game.change_screen("IntroScreen")
+        if event.type == pygame.MOUSEWHEEL:
+            self.scroll_offset += event.y * 5
 
     def update(self):
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        
         if not self.intro_music_skipped:
             self.game.intro_music.stop()
 
-        self.songs.update()
+        self.song_list.update()
         self.layer_1.update()
 
-    def render(self, screen):
+        for i, song in enumerate(self.song_list.sprites()):
+            target_y = (self.game.height - 150) // 2 + (i - self.selected_song_index) * (120) - self.scroll_offset
+            current_y = song.rect.y
+            song.rect.y += (target_y - current_y) // 5
+
+            if i == self.selected_song_index:
+                self.bg = song.bg
+            
+            if pygame.mouse.get_pressed()[0]:
+                if song.rect.collidepoint(mouse_x, mouse_y):
+                    if self.selected_song_index == i:
+                        pass
+                    else:
+                        self.selected_song_index = i
+                        if self.current_music:
+                            self.current_music.stop()
+                        self.current_music = song.music
+                        self.current_music.play(-1)
+
+        self.bg = pygame.transform.scale(self.bg, (self.game.width, self.game.height))
+
+    def render(self, screen: pygame.Surface):
         screen.fill((0, 0, 0))
         screen.blit(self.bg, (0, 0))
+
+        self.song_list.draw(screen)
 
         # Ui above
         pygame.draw.rect(screen, (0, 0, 0), (0, 0, self.game.width, 100))
@@ -62,33 +112,47 @@ class MainMenu:
         pygame.draw.line(screen, (0, 0, 255), (400, 100), (self.game.width, 100), 3)
         pygame.draw.line(screen, (0, 0, 255), (0, self.game.height - 100), (self.game.width, self.game.height - 100), 3)
 
-        self.songs.draw(screen)
-
         self.layer_1.draw(screen)
 
 
 class Song(pygame.sprite.Sprite):
-    def __init__(self, *groups, game, name, difficulty):
+    def __init__(self, *groups, game, name, author, difficulty_title, difficulty, bg, music):
         super().__init__(*groups)
 
         self.game = game
         self.name = name
+        self.author = author
+        self.difficulty_title = difficulty_title
         self.difficulty = difficulty
+        self.bg = bg
+        self.music = music
 
         self.image = self.game.skin_manager.get_skin("menu-button-background")
-        self.image = pygame.transform.scale(self.image, (1000, 150))
+        self.image = pygame.transform.scale(self.image, (1000, 160))
         self.rect = self.image.get_rect()
 
         self.rect.right = self.game.width + 400
         self.rect.y = self.game.height // 2
 
-    def update(self):
-        render_text(self.image, self.name, "Aller_Lt", 25, (150, 30))
+        aspect_ratio = self.bg.get_width() / self.bg.get_height()
+        self.logo = pygame.transform.scale(self.bg, (min(100 * aspect_ratio, 120), 100))
+        self.image.blit(self.logo, (15, 30))
 
-        for i in range(self.difficulty):
+    def update(self):
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+
+        render_text(self.image, self.name, "Aller_Lt", 25, (150, 30))
+        render_text(self.image, self.author, "Aller_Lt", 23, (150, 55))
+        render_text(self.image, self.difficulty_title, "Aller_Rg", 20, (150, 80))
+
+        if self.bg:
+            self.image.blit(self.logo, (15, 30))
+
+        # Stars
+        for i in range(math.ceil(float(self.difficulty))):
             star = self.game.skin_manager.get_skin("star")
-            star = pygame.transform.scale(star, (30, 30))
-            self.image.blit(star, (150 + 40 * i, 90))
+            star = pygame.transform.scale(star, (25, 30))
+            self.image.blit(star, (150 + 35 * i, 100))
 
 
 class BottomButton(pygame.sprite.Sprite):
@@ -190,6 +254,8 @@ class PlayButton(pygame.sprite.Sprite):
     def update(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
+        # hover/ animation
+
         if self.rect.collidepoint(mouse_x, mouse_y):
             self.image = pygame.transform.scale(self.original_image, (350, 350))
         else:
@@ -207,3 +273,8 @@ class PlayButton(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.centerx = self.game.width - 100
         self.rect.centery = self.game.height - 50
+
+        # Onclick
+        if pygame.mouse.get_pressed()[0]:
+            if self.rect.collidepoint(mouse_x, mouse_y):
+                self.game.change_screen("Level")

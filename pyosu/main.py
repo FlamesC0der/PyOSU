@@ -24,8 +24,8 @@ class Game():
         screen_info = pygame.display.Info()
         self.width, self.height = screen_info.current_w, screen_info.current_h
 
-        self.screen = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
-        # self.screen = pygame.display.set_mode((self.width, self.height), pygame.NOFRAME)
+        # self.screen = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode((self.width, self.height), pygame.NOFRAME)
         self.clock = pygame.time.Clock()
         self.skin_manager = SkinManager("boop")
 
@@ -34,8 +34,8 @@ class Game():
 
         self.screens = {"Intro": Intro(self), "IntroScreen": IntroScreen(self), "MainMenu": MainMenu(self),
                         "Level": Level(self)}
-        self.current_screen = "Intro"
-        # self.current_screen = "MainMenu"
+        # self.current_screen = "Intro"
+        self.current_screen = "MainMenu"
 
         pygame.display.set_caption("PyOSU")
         pygame.mouse.set_visible(False)
@@ -48,6 +48,8 @@ class Game():
 
         self.intro_music = pygame.mixer.Sound(os.path.join(ROOT_DIR, "game/resources/sounds/circles.mp3"))
         self.intro_music.play(-1)
+
+        logger.info("Starting game...")
 
     def handle_events(self):
         for event in pygame.event.get():

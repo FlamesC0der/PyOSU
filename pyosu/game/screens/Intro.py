@@ -24,7 +24,7 @@ class Intro:
     def update(self):
         self.sprites.update()
 
-    def render(self, screen):
+    def render(self, screen: pygame.Surface):
         screen.fill((0, 0, 0))
 
         self.sprites.draw(screen)

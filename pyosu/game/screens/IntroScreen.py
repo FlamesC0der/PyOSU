@@ -61,7 +61,7 @@ class IntroScreen:
         self.menu_buttons.update()
         self.sprites.update()
 
-    def render(self, screen):
+    def render(self, screen: pygame.Surface):
         screen.fill((0, 0, 0))
         screen.blit(self.bg, (0, 0))
 
