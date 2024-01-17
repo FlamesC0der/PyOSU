@@ -5,10 +5,11 @@ from pyosu.settings import ROOT_DIR
 from pyosu.game.utils.fonts import render_text
 from pyosu.game.utils.image_loader import load_image
 from pyosu.log import logger
+from pyosu.game.modes.osu import Circle
 
 
 class Level:
-    def __init__(self, game):
+    def __init__(self, game, args):
         self.game = game
 
         # Sprites
@@ -23,4 +24,4 @@ class Level:
 
     def render(self, screen: pygame.Surface):
         pass
-        # screen.fill((0, 0, 0))
+        screen.fill((0, 0, 0))

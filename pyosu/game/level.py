@@ -18,12 +18,12 @@ def get_levels() -> list[dict]:
             new_level = {
                 "level_name": level,
                 "levels": [],
-                "bg": pygame.Surface((1, 1)),
+                "bg": load_image(os.path.join(ROOT_DIR, "game/resources/sprites/standart_background.jpg")),
             }
 
             for file in os.listdir(os.path.join(ROOT_DIR, f"songs/{level}")):
                 if os.path.isfile(os.path.join(ROOT_DIR, f"songs/{level}/{file}")):
-                    name, extension = file.rsplit(".")
+                    *_, name, extension = file.rsplit(".")
                     if extension == "osu":  # osu files
                         match = info_pattern.match(name)
                         name, author, difficulty = [match.group(g) for g in range(1, 3 + 1)]

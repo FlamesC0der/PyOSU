@@ -1,6 +1,8 @@
 import pygame
 import sys
 
+from pyosu.log import logger
+
 
 class Cursor(pygame.sprite.Sprite):
     def __init__(self, screen, skin_manager):
@@ -23,7 +25,9 @@ class Cursor(pygame.sprite.Sprite):
 
 # temp
 def quit(game) -> None:
+    logger.warning("Exiting game")
     game.intro_music.stop()
+    pygame.mixer.stop()
     sound = pygame.mixer.Sound("game/resources/sounds/see_you_next_time.mp3")
     s = sound.play()
     while s.get_busy():

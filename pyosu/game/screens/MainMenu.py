@@ -1,6 +1,7 @@
 import pygame
 import os
 import math
+import random
 
 from pyosu.settings import ROOT_DIR
 from pyosu.game.utils.fonts import render_text
@@ -16,26 +17,27 @@ class MainMenu:
 
         self.intro_music_skipped = False
 
-        self.bottom_buttons = [(self.game.skin_manager.get_skin(f"{b}"), self.game.skin_manager.get_skin(f"{b}-over"))
-                               for b
-                               in ["selection-mode", "selection-mods", "selection-random", "selection-options"]]
+        self.bottom_buttons_list = [
+            (self.game.skin_manager.get_skin(f"{b}"), self.game.skin_manager.get_skin(f"{b}-over"))
+            for b
+            in ["selection-mode", "selection-mods", "selection-random", "selection-options"]]
 
         # Sprites
         self.song_list = pygame.sprite.Group()
+        self.bottom_buttons = pygame.sprite.Group()
         self.layer_1 = pygame.sprite.Group()
 
         BackButton(self.layer_1, game=self.game)
-        PlayButton(self.layer_1, game=self.game)
+        self.play_button = PlayButton(self.layer_1, game=self.game)
 
         self.bg = pygame.Surface((self.game.width, self.game.height))
         self.bg.fill((0, 0, 0))
 
         # Song list
-        self.selected_song_index = 0
-        self.scroll_offset = 0
-        self.current_music = None
 
-        for level in get_levels():
+        self.levels = get_levels()
+
+        for level in self.levels:
             for song_data in level["levels"]:
                 Song(self.song_list, game=self.game, name=song_data["name"], author=song_data["author"],
                      bg=level["bg"], difficulty=song_data["data"]["OverallDifficulty"],
@@ -45,53 +47,89 @@ class MainMenu:
                                       f"songs/{level['level_name']}/{song_data['data']['AudioFilename']}"))
                      )
 
+        self.selected_song_index = random.randint(0, len(self.song_list.sprites()) - 1)
+        self.scroll_offset = 0
+        self.current_music = None
+
         # Render bottom buttons
 
-        for i in range(len(self.bottom_buttons)):
+        for i in range(len(self.bottom_buttons_list)):
             BottomButton(
-                self.layer_1,
-                buttons=
                 self.bottom_buttons,
+                buttons=self.bottom_buttons_list,
                 game=self.game,
                 index=i
             )
 
-            logger.info("MainMenu screen Initialized")
+        self.music_playing = False
+
+        logger.info("MainMenu screen Initialized")
 
     def handle_events(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 self.game.change_screen("IntroScreen")
         if event.type == pygame.MOUSEWHEEL:
-            self.scroll_offset += event.y * 5
+            self.scroll_offset += event.y * 10
+
+    def change_song(self, i):
+        self.selected_song_index = i
+        if self.current_music:
+            self.current_music.stop()
+        self.current_music = self.song_list.sprites()[i].music
+        self.current_music.play(-1)
+        self.scroll_offset = 0
 
     def update(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
-        
+
         if not self.intro_music_skipped:
             self.game.intro_music.stop()
 
         self.song_list.update()
+        self.bottom_buttons.update()
         self.layer_1.update()
 
+        # functions
         for i, song in enumerate(self.song_list.sprites()):
-            target_y = (self.game.height - 150) // 2 + (i - self.selected_song_index) * (120) - self.scroll_offset
+            target_y = (self.game.height - 150) // 2 + (i - self.selected_song_index) * (
+                    120 - abs(self.selected_song_index - i) * 5) - self.scroll_offset
             current_y = song.rect.y
             song.rect.y += (target_y - current_y) // 5
+            song.rect.right = self.game.width + 200 + abs(self.selected_song_index - i) * 15
 
             if i == self.selected_song_index:
                 self.bg = song.bg
-            
+
             if pygame.mouse.get_pressed()[0]:
                 if song.rect.collidepoint(mouse_x, mouse_y):
-                    if self.selected_song_index == i:
+                    self.change_song(i)
+
+            if not self.music_playing:
+                if self.selected_song_index == i:
+                    self.current_music = song.music
+                    self.current_music.play(-1)
+                    self.music_playing = True
+
+        for i, button in enumerate(self.bottom_buttons.sprites()):
+            if pygame.mouse.get_pressed()[0]:
+                current_time = pygame.time.get_ticks()
+                if button.rect.collidepoint(mouse_x,
+                                            mouse_y) and (
+                        current_time - button.last_click_time >= button.cooldown_duration):
+                    if button.index == 0:
                         pass
-                    else:
-                        self.selected_song_index = i
-                        if self.current_music:
-                            self.current_music.stop()
-                        self.current_music = song.music
-                        self.current_music.play(-1)
+                    elif button.index == 1:
+                        pass
+                    elif button.index == 2:
+                        self.change_song(random.randint(0, len(self.song_list.sprites()) - 1))
+                    elif button.index == 3:
+                        pass
+
+        # Play button
+        if pygame.mouse.get_pressed()[0]:
+            if self.play_button.rect.collidepoint(mouse_x, mouse_y):
+                self.game.change_screen("Level", self.levels[self.selected_song_index])
 
         self.bg = pygame.transform.scale(self.bg, (self.game.width, self.game.height))
 
@@ -103,16 +141,22 @@ class MainMenu:
 
         # Ui above
         pygame.draw.rect(screen, (0, 0, 0), (0, 0, self.game.width, 100))
-        pygame.draw.rect(screen, (0, 0, 0), (0, 100, 300, 100))
-        pygame.draw.polygon(screen, (0, 0, 0), ((300, 100), (400, 100), (300, 200)))
+        pygame.draw.rect(screen, (0, 0, 0), (0, 100, 400, 100))
+        pygame.draw.polygon(screen, (0, 0, 0), ((400, 100), (500, 100), (400, 200)))
         pygame.draw.rect(screen, (0, 0, 0), (0, self.game.height - 100, self.game.width, self.game.height))
 
-        pygame.draw.line(screen, (0, 0, 255), (0, 200), (300, 200), 3)
-        pygame.draw.line(screen, (0, 0, 255), (300, 200), (400, 100), 3)
-        pygame.draw.line(screen, (0, 0, 255), (400, 100), (self.game.width, 100), 3)
+        pygame.draw.line(screen, (0, 0, 255), (0, 200), (400, 200), 3)
+        pygame.draw.line(screen, (0, 0, 255), (400, 200), (500, 100), 3)
+        pygame.draw.line(screen, (0, 0, 255), (500, 100), (self.game.width, 100), 3)
         pygame.draw.line(screen, (0, 0, 255), (0, self.game.height - 100), (self.game.width, self.game.height - 100), 3)
 
+        self.bottom_buttons.draw(screen)
         self.layer_1.draw(screen)
+
+        for i, song in enumerate(self.song_list.sprites()):
+            if i == self.selected_song_index:
+                render_text(self.screen, song.name, "Aller_Lt", 30, (50, 10))
+                render_text(self.screen, f"Mapped by {song.author}", "Aller_Lt", 20, (50, 40))
 
 
 class Song(pygame.sprite.Sprite):
@@ -128,7 +172,7 @@ class Song(pygame.sprite.Sprite):
         self.music = music
 
         self.image = self.game.skin_manager.get_skin("menu-button-background")
-        self.image = pygame.transform.scale(self.image, (1000, 160))
+        self.image = pygame.transform.scale(self.image, (800, 160))
         self.rect = self.image.get_rect()
 
         self.rect.right = self.game.width + 400
@@ -138,16 +182,11 @@ class Song(pygame.sprite.Sprite):
         self.logo = pygame.transform.scale(self.bg, (min(100 * aspect_ratio, 120), 100))
         self.image.blit(self.logo, (15, 30))
 
-    def update(self):
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-
         render_text(self.image, self.name, "Aller_Lt", 25, (150, 30))
         render_text(self.image, self.author, "Aller_Lt", 23, (150, 55))
         render_text(self.image, self.difficulty_title, "Aller_Rg", 20, (150, 80))
 
-        if self.bg:
-            self.image.blit(self.logo, (15, 30))
-
+    def update(self):
         # Stars
         for i in range(math.ceil(float(self.difficulty))):
             star = self.game.skin_manager.get_skin("star")
@@ -175,7 +214,7 @@ class BottomButton(pygame.sprite.Sprite):
         self.rect.y = self.game.height - 100
 
         self.last_click_time = 0
-        self.cooldown_duration = 500
+        self.cooldown_duration = 1000
 
         if self.index == 0:
             self.mode = load_image(os.path.join(ROOT_DIR, "game/resources/sprites/mode_osu.png"))
@@ -190,16 +229,6 @@ class BottomButton(pygame.sprite.Sprite):
             self.image = self.hover_image
         else:
             self.image = self.original_image
-
-        # Click
-
-        if pygame.mouse.get_pressed()[0]:
-            current_time = pygame.time.get_ticks()
-            if self.rect.collidepoint(mouse_x, mouse_y):
-                if current_time - self.last_click_time >= self.cooldown_duration:
-                    # todo create menu for each button
-
-                    self.last_click_time = current_time
 
         if self.index == 0:
             self.image.blit(self.mode, (30, 20))
@@ -254,7 +283,7 @@ class PlayButton(pygame.sprite.Sprite):
     def update(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
-        # hover/ animation
+        # hover/animation
 
         if self.rect.collidepoint(mouse_x, mouse_y):
             self.image = pygame.transform.scale(self.original_image, (350, 350))
@@ -273,8 +302,3 @@ class PlayButton(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.centerx = self.game.width - 100
         self.rect.centery = self.game.height - 50
-
-        # Onclick
-        if pygame.mouse.get_pressed()[0]:
-            if self.rect.collidepoint(mouse_x, mouse_y):
-                self.game.change_screen("Level")

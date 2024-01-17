@@ -1,11 +1,13 @@
 import pygame
 import sys
 import os
+import math
 
 from pyosu.settings import ROOT_DIR
 from pyosu.log import logger
 from pyosu.game.core import Cursor
 from pyosu.game.skin_manager import SkinManager
+from pyosu.game.utils.fonts import render_text
 
 # Screens
 from pyosu.game.screens.Intro import Intro
@@ -32,10 +34,8 @@ class Game():
         self.cursor = Cursor(self.screen, self.skin_manager)
         self.is_Running = True
 
-        self.screens = {"Intro": Intro(self), "IntroScreen": IntroScreen(self), "MainMenu": MainMenu(self),
-                        "Level": Level(self)}
-        # self.current_screen = "Intro"
-        self.current_screen = "MainMenu"
+        self.screens = {"Intro": Intro(self), "IntroScreen": IntroScreen(self), "MainMenu": MainMenu(self)}
+        self.current_screen = self.screens["Intro"]
 
         pygame.display.set_caption("PyOSU")
         pygame.mouse.set_visible(False)
@@ -59,19 +59,23 @@ class Game():
                 pygame.quit()
                 sys.exit()
 
-            self.screens[self.current_screen].handle_events(event)
+            self.current_screen.handle_events(event)
 
-    def change_screen(self, new_screen):
-        if new_screen in self.screens:
-            self.current_screen = new_screen
-            logger.info(f"changed screen to {new_screen}")
+    def change_screen(self, new_screen, *args):
+        # Static screens
+        if new_screen in ["IntroScreen", "MainMenu"]:
+            self.current_screen = self.screens[new_screen]
+        elif new_screen == "Level":
+            self.current_screen = Level(self, args[0])
+        logger.info(f"changed screen to {new_screen}")
 
     def update(self):
-        self.screens[self.current_screen].update()
+        self.current_screen.update()
 
     def render(self):
-        self.screens[self.current_screen].render(self.screen)
+        self.current_screen.render(self.screen)
         self.cursor.update()
+        render_text(self.screen, math.floor(self.clock.get_fps()))  # fps
         pygame.display.flip()
 
     def run(self):
@@ -80,7 +84,7 @@ class Game():
             self.update()
             self.render()
 
-            self.clock.tick(60)
+            self.clock.tick(70)
 
 
 if __name__ == "__main__":
