@@ -14,14 +14,12 @@ class Level:
         self.screen = self.game.screen
         self.args = args
 
-        # pprint(self.args)
-
         self.data = self.args[1]["data"]
 
         self.game.current_music.stop()
 
         logger.info(f"Starting level {self.args[1]['name']}")
-        # pprint(self.data)
+        pprint(self.data)
 
         self.start_time = pygame.time.get_ticks()
 
@@ -37,33 +35,7 @@ class Level:
 
         self.bg = self.args[0]["bg"]
         self.bg = pygame.transform.scale(self.bg, (self.game.width, self.game.height))
-        self.bg.set_alpha(100)
-
-        # test
-        # Circle(
-        #     self.circles_sprites,
-        #     game=self.game,
-        #     pos=(0, 0),
-        #     start_time=15
-        # )
-        # Circle(
-        #     self.circles_sprites,
-        #     game=self.game,
-        #     pos=(512, 0),
-        #     start_time=15
-        # )
-        # Circle(
-        #     self.circles_sprites,
-        #     game=self.game,
-        #     pos=(512, 512),
-        #     start_time=15
-        # )
-        # Circle(
-        #     self.circles_sprites,
-        #     game=self.game,
-        #     pos=(0, 512),
-        #     start_time=15
-        # )
+        self.bg.set_alpha(120)
 
     def handle_events(self, event):
         if event.type == pygame.KEYDOWN:
@@ -85,7 +57,12 @@ class Level:
                 elif object["object_name"] == "slider":
                     pass
                 elif object["object_name"] == "spinner":
-                    pass
+                    Spinner(
+                        self.circles_sprites,
+                        game=self.game,
+                        start_time=object["startTime"],
+                        end_time=object["end_time"]
+                    )
                 self.objects.remove(object)
 
         self.circles_sprites.update(current_time)
@@ -116,8 +93,8 @@ class Circle(pygame.sprite.Sprite):
 
     def update(self, current_time):
         if current_time > self.start_time - 500:  # show before animation
-            progress = min(1, (current_time - self.start_time) / 500)
-            scaled_size = int(100 + (150 - 100) * (1 - progress))
+            progress = (self.start_time - current_time) / 500
+            scaled_size = int(128 + (175 * progress))
 
             self.image = pygame.transform.scale(self.approach_circle, (scaled_size, scaled_size))
             self.rect = self.image.get_rect(center=self.rect.center)
@@ -126,3 +103,35 @@ class Circle(pygame.sprite.Sprite):
             self.rect = self.image.get_rect(center=self.rect.center)
         if current_time > self.start_time + 200:  # hide
             self.kill()
+
+        # todo fix this problem
+        # self.image.blit(self.hit_circle, (self.image.get_width() // 2 - 62.5, self.image.get_height() // 2 - 62.5))
+
+
+class Spinner(pygame.sprite.Sprite):
+    def __init__(self, *groups, game, start_time, end_time):
+        super().__init__(*groups)
+
+        self.game = game
+        self.start_time = start_time
+        self.end_time = end_time
+
+        self.approach_circle = self.game.skin_manager.get_skin("spinner-approachcircle")
+        self.spinner_circle = self.game.skin_manager.get_skin("spinner-circle")
+
+        self.image = self.approach_circle.copy()
+
+        self.rect = self.image.get_rect()
+        self.rect.centerx = self.game.padding + 50 + 0.5 * (self.game.height - 100)
+        self.rect.centery = 100 + 0.5 * (self.game.height - 200)
+
+    def update(self, current_time):
+        if current_time > self.start_time:
+            progress = (current_time - self.start_time) / (self.end_time - self.start_time)
+            scaled_size = max(1, int(100 + (340 * (1 - progress))))
+            self.image = pygame.transform.scale(self.approach_circle, (scaled_size, scaled_size))
+            self.rect = self.image.get_rect(center=self.rect.center)
+        if current_time > self.end_time:
+            self.kill()
+
+        self.image.blit(self.spinner_circle, (self.image.get_width() // 2 - 62.5, self.image.get_height() // 2 - 62.5))

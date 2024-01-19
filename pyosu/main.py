@@ -5,7 +5,7 @@ import math
 
 from pyosu.settings import ROOT_DIR
 from pyosu.log import logger
-from pyosu.game.core import Cursor
+from pyosu.game.core import Cursor, quit
 from pyosu.game.skin_manager import SkinManager
 from pyosu.game.utils.fonts import render_text
 
@@ -35,8 +35,8 @@ class Game():
         self.is_Running = True
 
         self.screens = {"Intro": Intro(self), "IntroScreen": IntroScreen(self), "MainMenu": MainMenu(self)}
-        # self.current_screen = self.screens["Intro"]
-        self.current_screen = self.screens["MainMenu"]
+        self.current_screen = self.screens["Intro"]
+        # self.current_screen = self.screens["MainMenu"]
 
         pygame.display.set_caption("PyOSU")
         pygame.mouse.set_visible(False)
@@ -92,4 +92,7 @@ class Game():
 if __name__ == "__main__":
     logger.info("PyOSU By FlamesCoder")
     game = Game()
-    game.run()
+    try:
+        game.run()
+    except KeyboardInterrupt:
+        quit(game)
