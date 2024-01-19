@@ -26,8 +26,8 @@ class Game():
         screen_info = pygame.display.Info()
         self.width, self.height = screen_info.current_w, screen_info.current_h
 
-        # self.screen = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
-        self.screen = pygame.display.set_mode((self.width, self.height), pygame.NOFRAME)
+        self.screen = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
+        # self.screen = pygame.display.set_mode((self.width, self.height), pygame.NOFRAME)
         self.clock = pygame.time.Clock()
         self.skin_manager = SkinManager("boop")
 
@@ -35,7 +35,8 @@ class Game():
         self.is_Running = True
 
         self.screens = {"Intro": Intro(self), "IntroScreen": IntroScreen(self), "MainMenu": MainMenu(self)}
-        self.current_screen = self.screens["Intro"]
+        # self.current_screen = self.screens["Intro"]
+        self.current_screen = self.screens["MainMenu"]
 
         pygame.display.set_caption("PyOSU")
         pygame.mouse.set_visible(False)
@@ -46,10 +47,11 @@ class Game():
         sound = pygame.mixer.Sound(os.path.join(ROOT_DIR, "game/resources/sounds/welcome.mp3"))
         sound.play()
 
-        self.intro_music = pygame.mixer.Sound(os.path.join(ROOT_DIR, "game/resources/sounds/circles.mp3"))
-        self.intro_music.play(-1)
+        self.current_music = pygame.mixer.Sound(os.path.join(ROOT_DIR, "game/resources/sounds/circles.mp3"))
+        self.current_music.play(-1)
 
         logger.info("Starting game...")
+        logger.info("==========================")
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -75,7 +77,7 @@ class Game():
     def render(self):
         self.current_screen.render(self.screen)
         self.cursor.update()
-        render_text(self.screen, math.floor(self.clock.get_fps()))  # fps
+        render_text(self.screen, f"fps: {math.ceil(self.clock.get_fps())}", size=20, position=(10, 20))  # fps
         pygame.display.flip()
 
     def run(self):
@@ -84,7 +86,7 @@ class Game():
             self.update()
             self.render()
 
-            self.clock.tick(70)
+            self.clock.tick(60)
 
 
 if __name__ == "__main__":

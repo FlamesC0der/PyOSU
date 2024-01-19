@@ -26,7 +26,7 @@ class Cursor(pygame.sprite.Sprite):
 # temp
 def quit(game) -> None:
     logger.warning("Exiting game")
-    game.intro_music.stop()
+    game.current_music.stop()
     pygame.mixer.stop()
     sound = pygame.mixer.Sound("game/resources/sounds/see_you_next_time.mp3")
     s = sound.play()

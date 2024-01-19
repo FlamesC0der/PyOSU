@@ -27,7 +27,7 @@ class MainMenu:
         self.bottom_buttons = pygame.sprite.Group()
         self.layer_1 = pygame.sprite.Group()
 
-        BackButton(self.layer_1, game=self.game)
+        self.back_button = BackButton(self.layer_1, game=self.game)
         self.play_button = PlayButton(self.layer_1, game=self.game)
 
         self.bg = pygame.Surface((self.game.width, self.game.height))
@@ -35,10 +35,11 @@ class MainMenu:
 
         # Song list
 
-        self.levels = get_levels()
+        self.levels = []
 
-        for level in self.levels:
+        for level in get_levels():
             for song_data in level["levels"]:
+                self.levels.append((level, song_data))
                 Song(self.song_list, game=self.game, name=song_data["name"], author=song_data["author"],
                      bg=level["bg"], difficulty=song_data["data"]["OverallDifficulty"],
                      difficulty_title=song_data["difficulty"],
@@ -49,7 +50,8 @@ class MainMenu:
 
         self.selected_song_index = random.randint(0, len(self.song_list.sprites()) - 1)
         self.scroll_offset = 0
-        self.current_music = None
+
+        self.song_last_clicked = pygame.time.get_ticks()
 
         # Render bottom buttons
 
@@ -74,43 +76,47 @@ class MainMenu:
 
     def change_song(self, i):
         self.selected_song_index = i
-        if self.current_music:
-            self.current_music.stop()
-        self.current_music = self.song_list.sprites()[i].music
-        self.current_music.play(-1)
+        if self.game.current_music:
+            self.game.current_music.stop()
+        self.game.current_music = self.song_list.sprites()[i].music
+        self.game.current_music.play(-1)
         self.scroll_offset = 0
 
     def update(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
-
-        if not self.intro_music_skipped:
-            self.game.intro_music.stop()
+        current_time = pygame.time.get_ticks()
 
         self.song_list.update()
         self.bottom_buttons.update()
         self.layer_1.update()
 
-        # functions
+        # handle songs
         for i, song in enumerate(self.song_list.sprites()):
             target_y = (self.game.height - 150) // 2 + (i - self.selected_song_index) * (
                     120 - abs(self.selected_song_index - i) * 5) - self.scroll_offset
             current_y = song.rect.y
-            song.rect.y += (target_y - current_y) // 5
-            song.rect.right = self.game.width + 200 + abs(self.selected_song_index - i) * 15
+            song.rect.y += min(200, (target_y - current_y) // 5)
+            song.rect.right = self.game.width + 200 + min(5, abs(self.selected_song_index - i)) * 15
 
             if i == self.selected_song_index:
                 self.bg = song.bg
 
             if pygame.mouse.get_pressed()[0]:
-                if song.rect.collidepoint(mouse_x, mouse_y):
+                if song.rect.collidepoint(mouse_x, mouse_y) and not self.play_button.rect.collidepoint(mouse_x,
+                                                                                                       mouse_y) and (
+                        current_time - self.song_last_clicked >= 500):
+                    self.song_last_clicked = pygame.time.get_ticks()
                     self.change_song(i)
 
+            # start playing music if not playing
             if not self.music_playing:
                 if self.selected_song_index == i:
-                    self.current_music = song.music
-                    self.current_music.play(-1)
+                    self.game.current_music.stop()
+                    self.game.current_music = song.music
+                    self.game.current_music.play(-1)
                     self.music_playing = True
 
+        # handle bottom buttons
         for i, button in enumerate(self.bottom_buttons.sprites()):
             if pygame.mouse.get_pressed()[0]:
                 current_time = pygame.time.get_ticks()
@@ -129,6 +135,7 @@ class MainMenu:
         # Play button
         if pygame.mouse.get_pressed()[0]:
             if self.play_button.rect.collidepoint(mouse_x, mouse_y):
+                self.music_playing = False
                 self.game.change_screen("Level", self.levels[self.selected_song_index])
 
         self.bg = pygame.transform.scale(self.bg, (self.game.width, self.game.height))
