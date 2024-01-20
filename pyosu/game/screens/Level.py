@@ -4,6 +4,7 @@ import os
 from pyosu.settings import ROOT_DIR
 from pyosu.game.utils.fonts import render_text
 from pyosu.game.utils.image_loader import load_image
+from pyosu.game.core import handle_click
 from pyosu.log import logger
 from pprint import pprint
 
@@ -23,9 +24,9 @@ class Level:
 
         self.start_time = pygame.time.get_ticks()
 
-        music = self.game.current_music = pygame.mixer.Sound(
+        self.music_playing = False
+        self.music = self.game.current_music = pygame.mixer.Sound(
             os.path.join(ROOT_DIR, f"songs/{self.args[1]['name']}/{self.data['AudioFilename']}"))
-        music.play()
 
         # Sprites
         self.game.padding = (self.game.width - self.game.height) // 2
@@ -38,12 +39,15 @@ class Level:
         self.bg.set_alpha(120)
 
         # Stats
-        self.total_notes = len(self.objects)
+        self.nbCircles = self.data["nbCircles"]
+        self.nbSliders = self.data["nbSliders"]
+        self.nbSpinners = self.data["nbSpinners"]
+
         self.current_notes = 0
         self.clicked_notes = 0
         self.score = 0
 
-        self.combo = 0
+        self.game.combo = 0
         self.accuracy = 100
         self.score = 0
 
@@ -54,7 +58,11 @@ class Level:
 
     def update(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
-        current_time = pygame.time.get_ticks() - self.start_time
+        current_time = pygame.time.get_ticks() - self.start_time - 5000
+
+        if current_time > 0 and not self.music_playing:
+            self.music.play()
+            self.music_playing = True
 
         for object in self.objects:
             if current_time > object["startTime"] - 500:
@@ -80,12 +88,12 @@ class Level:
         self.circles_sprites.update(current_time)
 
         for i, object in enumerate(self.circles_sprites.sprites()):
-            if pygame.mouse.get_pressed()[0] or pygame.key.get_pressed()[pygame.K_z]:
-                if object.rect.collidepoint(mouse_x, mouse_y) and not object.animation and not object.clicked:
-                    logger.info(f"clicked {self.clicked_notes + 1}/{self.total_notes}")
-                    object.clicked = True
-                    self.clicked_notes += 1
-                    self.score += 300
+            if handle_click(object, mouse_x, mouse_y) and not object.animation and not object.clicked:
+                logger.info(f"clicked {self.clicked_notes + 1}/{self.nbCircles}")
+                object.clicked = True
+                self.clicked_notes += 1
+                self.score += 300
+                self.game.combo += 1
 
         if not self.objects:
             self.game.change_screen("MainMenu")
@@ -103,6 +111,8 @@ class Level:
                     position=(self.game.width - 250, 15))
         render_text(self.screen, f"{self.accuracy:.2f}%", font_name="Aller_It", size=30,
                     position=(self.game.width - 150, 60))
+        render_text(self.screen, f"{self.game.combo}x", font_name="AllerDisplay", size=40,
+                    position=(20, self.game.height - 100))
 
 
 class Circle(pygame.sprite.Sprite):
@@ -136,7 +146,10 @@ class Circle(pygame.sprite.Sprite):
             self.animation = False
             self.image = self.hit_circle
             self.rect = self.image.get_rect(center=self.rect.center)
-        if current_time > self.start_time + 200 or self.clicked:  # hide
+        if self.clicked:
+            self.kill()
+        if current_time > self.start_time + 200:  # hide
+            self.game.combo = 0
             self.kill()
 
         # todo fix this problem

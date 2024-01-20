@@ -5,6 +5,7 @@ import random
 from pyosu.settings import ROOT_DIR
 from pyosu.game.utils.image_loader import load_image
 from pyosu.game.core import quit
+from pyosu.game.core import handle_click
 from pyosu.log import logger
 
 
@@ -97,12 +98,11 @@ class OsuButton(pygame.sprite.Sprite):
         if current_time - self.last_click_time >= 10000:
             self.opened = False
 
-        if pygame.mouse.get_pressed()[0]:
-            if self.rect.collidepoint(mouse_x, mouse_y):
-                if not self.opened:
-                    self.opened = True
+        if handle_click(self, mouse_x, mouse_y):
+            if not self.opened:
+                self.opened = True
 
-                    self.last_click_time = current_time
+                self.last_click_time = current_time
 
         if self.rect.collidepoint(mouse_x, mouse_y) or self.opened:
             self.image = pygame.transform.scale(self.original_image, (700, 700))
@@ -175,8 +175,9 @@ class MenuButton(pygame.sprite.Sprite):
             self.rect.centerx = self.game.width // 2 + 200
 
         # Onclick
-        if pygame.mouse.get_pressed()[0] and self.osu_button.opened and not self.osu_button.rect.collidepoint(mouse_x,
-                                                                                                              mouse_y):
+        if handle_click(self, mouse_x,
+                        mouse_y) and self.osu_button.opened and not self.osu_button.rect.collidepoint(mouse_x,
+                                                                                                          mouse_y):
             if self.rect.collidepoint(mouse_x, mouse_y) and current_time - self.osu_button.last_click_time >= 250:
                 self.osu_button.opened = False
                 if self.index == 0:

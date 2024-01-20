@@ -39,3 +39,11 @@ def quit(game) -> None:
 
 def time_to_frame(ms: int) -> int:
     return int(ms * 60 / 1000)
+
+
+def handle_click(object, mouse_x: int, mouse_y: int):
+    keys = pygame.key.get_pressed()
+    if pygame.mouse.get_pressed()[0] or keys[pygame.K_z] or keys[pygame.K_x]:
+        if object.rect.collidepoint(mouse_x, mouse_y):
+            return True
+    return False

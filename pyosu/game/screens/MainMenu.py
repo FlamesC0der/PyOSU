@@ -7,6 +7,7 @@ from pyosu.settings import ROOT_DIR
 from pyosu.game.utils.fonts import render_text
 from pyosu.game.utils.image_loader import load_image
 from pyosu.game.level import get_levels
+from pyosu.game.core import handle_click
 from pyosu.log import logger
 
 
@@ -85,6 +86,7 @@ class MainMenu:
     def update(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
         current_time = pygame.time.get_ticks()
+        keys = pygame.key.get_pressed()
 
         self.song_list.update()
         self.bottom_buttons.update()
@@ -101,9 +103,9 @@ class MainMenu:
             if i == self.selected_song_index:
                 self.bg = song.bg
 
-            if pygame.mouse.get_pressed()[0]:
-                if song.rect.collidepoint(mouse_x, mouse_y) and not self.play_button.rect.collidepoint(mouse_x,
-                                                                                                       mouse_y) and (
+            if handle_click(song, mouse_x, mouse_y):
+                if not self.play_button.rect.collidepoint(mouse_x,
+                                                          mouse_y) and (
                         current_time - self.song_last_clicked >= 500):
                     self.song_last_clicked = pygame.time.get_ticks()
                     self.change_song(i)
@@ -118,7 +120,7 @@ class MainMenu:
 
         # handle bottom buttons
         for i, button in enumerate(self.bottom_buttons.sprites()):
-            if pygame.mouse.get_pressed()[0]:
+            if pygame.mouse.get_pressed()[0] or keys[pygame.K_z] or keys[pygame.K_x]:
                 current_time = pygame.time.get_ticks()
                 if button.rect.collidepoint(mouse_x,
                                             mouse_y) and (
@@ -133,7 +135,7 @@ class MainMenu:
                         pass
 
         # Play button
-        if pygame.mouse.get_pressed()[0]:
+        if pygame.mouse.get_pressed()[0] or keys[pygame.K_z] or keys[pygame.K_x]:
             if self.play_button.rect.collidepoint(mouse_x, mouse_y):
                 self.music_playing = False
                 self.game.change_screen("Level", self.levels[self.selected_song_index])
@@ -268,9 +270,8 @@ class BackButton(pygame.sprite.Sprite):
         self.image = self.frames[self.current_frame_index]
         self.image = pygame.transform.scale(self.image, (250, 250))
 
-        if pygame.mouse.get_pressed()[0]:
-            if self.rect.collidepoint(mouse_x, mouse_y):
-                self.game.change_screen("IntroScreen")
+        if handle_click(self, mouse_x, mouse_y):
+            self.game.change_screen("IntroScreen")
 
 
 class PlayButton(pygame.sprite.Sprite):
@@ -291,7 +292,6 @@ class PlayButton(pygame.sprite.Sprite):
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
         # hover/animation
-
         if self.rect.collidepoint(mouse_x, mouse_y):
             self.image = pygame.transform.scale(self.original_image, (350, 350))
         else:

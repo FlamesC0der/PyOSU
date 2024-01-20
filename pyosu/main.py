@@ -26,8 +26,8 @@ class Game():
         screen_info = pygame.display.Info()
         self.width, self.height = screen_info.current_w, screen_info.current_h
 
-        # self.screen = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
-        self.screen = pygame.display.set_mode((self.width, self.height), pygame.NOFRAME)
+        self.screen = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
+        # self.screen = pygame.display.set_mode((self.width, self.height), pygame.NOFRAME)
         self.clock = pygame.time.Clock()
         self.skin_manager = SkinManager("boop")
 
