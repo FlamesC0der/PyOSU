@@ -19,7 +19,7 @@ class Level:
         self.game.current_music.stop()
 
         logger.info(f"Starting level {self.args[1]['name']}")
-        pprint(self.data)
+        # pprint(self.data)
 
         self.start_time = pygame.time.get_ticks()
 
@@ -37,12 +37,23 @@ class Level:
         self.bg = pygame.transform.scale(self.bg, (self.game.width, self.game.height))
         self.bg.set_alpha(120)
 
+        # Stats
+        self.total_notes = len(self.objects)
+        self.current_notes = 0
+        self.clicked_notes = 0
+        self.score = 0
+
+        self.combo = 0
+        self.accuracy = 100
+        self.score = 0
+
     def handle_events(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 self.game.change_screen("MainMenu")
 
     def update(self):
+        mouse_x, mouse_y = pygame.mouse.get_pos()
         current_time = pygame.time.get_ticks() - self.start_time
 
         for object in self.objects:
@@ -64,14 +75,34 @@ class Level:
                         end_time=object["end_time"]
                     )
                 self.objects.remove(object)
+                self.current_notes += 1
 
         self.circles_sprites.update(current_time)
+
+        for i, object in enumerate(self.circles_sprites.sprites()):
+            if pygame.mouse.get_pressed()[0] or pygame.key.get_pressed()[pygame.K_z]:
+                if object.rect.collidepoint(mouse_x, mouse_y) and not object.animation and not object.clicked:
+                    logger.info(f"clicked {self.clicked_notes + 1}/{self.total_notes}")
+                    object.clicked = True
+                    self.clicked_notes += 1
+                    self.score += 300
+
+        if not self.objects:
+            self.game.change_screen("MainMenu")
+
+        if self.current_notes > 0:
+            self.accuracy = (self.score / (self.current_notes * 300)) * 100
 
     def render(self, screen: pygame.Surface):
         screen.fill((0, 0, 0))
         screen.blit(self.bg, (0, 0))
 
         self.circles_sprites.draw(screen)
+
+        render_text(self.screen, f"{self.score:010}", font_name="AllerDisplay", size=40,
+                    position=(self.game.width - 250, 15))
+        render_text(self.screen, f"{self.accuracy:.2f}%", font_name="Aller_It", size=30,
+                    position=(self.game.width - 150, 60))
 
 
 class Circle(pygame.sprite.Sprite):
@@ -91,6 +122,9 @@ class Circle(pygame.sprite.Sprite):
         self.rect.centerx = self.game.padding + 50 + (self.pos[0] / 512) * (self.game.height - 100)
         self.rect.centery = 100 + (self.pos[1] / 512) * (self.game.height - 200)
 
+        self.clicked = False
+        self.animation = True
+
     def update(self, current_time):
         if current_time > self.start_time - 500:  # show before animation
             progress = (self.start_time - current_time) / 500
@@ -99,9 +133,10 @@ class Circle(pygame.sprite.Sprite):
             self.image = pygame.transform.scale(self.approach_circle, (scaled_size, scaled_size))
             self.rect = self.image.get_rect(center=self.rect.center)
         if current_time > self.start_time:  # show hit
+            self.animation = False
             self.image = self.hit_circle
             self.rect = self.image.get_rect(center=self.rect.center)
-        if current_time > self.start_time + 200:  # hide
+        if current_time > self.start_time + 200 or self.clicked:  # hide
             self.kill()
 
         # todo fix this problem
@@ -124,6 +159,9 @@ class Spinner(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.centerx = self.game.padding + 50 + 0.5 * (self.game.height - 100)
         self.rect.centery = 100 + 0.5 * (self.game.height - 200)
+
+        self.clicked = False
+        self.animation = True
 
     def update(self, current_time):
         if current_time > self.start_time:
