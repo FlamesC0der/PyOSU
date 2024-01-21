@@ -75,8 +75,8 @@ class Game():
             self.current_screen = ResultScreen(self, args)
         logger.info(f"changed screen to {new_screen}")
 
-    def update(self):
-        self.current_screen.update()
+    def update(self, events):
+        self.current_screen.update(events)
 
     def render(self):
         self.current_screen.render(self.screen)

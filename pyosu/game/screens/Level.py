@@ -110,7 +110,7 @@ class Level:
                     )
                 self.objects.remove(object)
 
-        self.circles_sprites.update(current_time)
+        self.circles_sprites.update(current_time, events)
         self.game.hit_images.update()
 
         if len(self.circles_sprites.sprites()) == 0 and not self.objects:  # quit from level

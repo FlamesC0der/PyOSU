@@ -28,7 +28,7 @@ class Circle(pygame.sprite.Sprite):
         self.clicked = False
         self.animation = True
 
-    def update(self, current_time):
+    def update(self, current_time, events):
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
         if current_time > self.start_time - 500:  # show before animation
@@ -124,17 +124,17 @@ class Slider(pygame.sprite.Sprite):
                 self.game.padding + 50 + (pos[0] / 512) * (self.game.height - 100),
                 100 + (pos[1] / 512) * (self.game.height - 200)), 50)
 
-    def update(self, current_time):
+    def update(self, current_time, events):
         diff = (current_time - self.start_time) / self.duration
         if 1 >= diff > 0 and (self.follow_circle_index != int(diff * len(self.curve_points))):
             self.follow_circle_index = int(diff * (len(self.curve_points) - 1))
             self.follow_circle.update_pos(self.curve_points[self.follow_circle_index])
         self.follow_circle_index = int(diff * (len(self.curve_points) - 1))
 
-        if current_time > self.end_time:
+        if current_time > self.end_time + 50:
+            self.game.current_notes += 2
             self.follow_circle.kill()
             self.kill()
-            current_time / self.start_time
 
 
 class SliderFollowCircle(pygame.sprite.Sprite):
@@ -152,17 +152,65 @@ class SliderFollowCircle(pygame.sprite.Sprite):
         self.rect.centerx = self.game.padding + 50 + (slider.curve_points[0][0] / 512) * (self.game.height - 100)
         self.rect.centery = 100 + (slider.curve_points[0][1] / 512) * (self.game.height - 200)
 
-        self.state = 0
+        self.clicked = False
+        self.holding = False
         self.hold_start_time = 0
 
     def update_pos(self, pos):
         self.rect.centerx = self.game.padding + 50 + (pos[0] / 512) * (self.game.height - 100)
         self.rect.centery = 100 + (pos[1] / 512) * (self.game.height - 200)
 
-    def update(self, current_time):
+    def update(self, current_time, events):
         mouse_x, mouse_y = pygame.mouse.get_pos()
-        HitImage(self.game.hit_images, game=self.game, pos=(self.rect.centerx, self.rect.centery),
-                 score="100k")
+
+        if current_time - self.slider.start_time > 200 and not self.holding and not self.clicked:
+            self.clicked = True
+            HitImage(self.game.hit_images, game=self.game, pos=(self.rect.centerx, self.rect.centery),
+                     score="0")
+            self.game.score["combo"] = 0
+            self.game.score["notes_values"]["0"] += 2
+
+        if self.rect.collidepoint(mouse_x, mouse_y):
+            for event in events:
+                if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
+                    if not self.holding and not self.clicked:
+                        self.clicked = True
+                        self.holding = True
+                        self.hold_start_time = pygame.time.get_ticks()
+
+                        if current_time - self.slider.start_time <= 100:
+                            HitImage(self.game.hit_images, game=self.game, pos=(self.rect.centerx, self.rect.centery),
+                                     score="300k")
+                            self.game.score["score"] += 300
+                            self.game.score["combo"] += 1
+                            self.game.score["notes_values"]["300-0"] += 1
+                        elif 101 <= current_time - self.slider.start_time <= 200:
+                            HitImage(self.game.hit_images, game=self.game, pos=(self.rect.centerx, self.rect.centery),
+                                     score="100k")
+                            self.game.score["score"] += 100
+                            self.game.score["combo"] += 1
+                            self.game.score["notes_values"]["100-0"] += 1
+                elif event.type == pygame.MOUSEBUTTONUP or event.type == pygame.KEYUP:
+                    if self.holding:
+                        if current_time - self.slider.end_time - 100 <= 100:
+                            HitImage(self.game.hit_images, game=self.game, pos=(self.rect.centerx, self.rect.centery),
+                                     score="300k")
+                            self.game.score["score"] += 300
+                            self.game.score["combo"] += 1
+                            self.game.score["notes_values"]["300-0"] += 1
+                        elif 101 <= current_time - self.slider.end_time - 100 <= 200:
+                            HitImage(self.game.hit_images, game=self.game, pos=(self.rect.centerx, self.rect.centery),
+                                     score="100k")
+                            self.game.score["score"] += 100
+                            self.game.score["combo"] += 1
+                            self.game.score["notes_values"]["100-0"] += 1
+        elif self.rect.collidepoint(mouse_x, mouse_y) and self.holding:
+            self.clicked = True
+
+            HitImage(self.game.hit_images, game=self.game, pos=(self.rect.centerx, self.rect.centery),
+                     score="0")
+            self.game.score["combo"] = 0
+            self.game.score["notes_values"]["0"] += 1
 
 
 class Spinner(pygame.sprite.Sprite):
@@ -183,7 +231,7 @@ class Spinner(pygame.sprite.Sprite):
         self.rect.centerx = self.game.padding + 50 + 0.5 * (self.game.height - 100)
         self.rect.centery = 100 + 0.5 * (self.game.height - 200)
 
-    def update(self, current_time):
+    def update(self, current_time, events):
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
         if current_time > self.start_time:
