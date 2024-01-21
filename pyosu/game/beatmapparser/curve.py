@@ -1,6 +1,7 @@
 # Code from https://github.com/Awlexus/python-osu-parser
 
 import math
+import numpy as np
 
 
 # Translated from JavaScript to Python by Awlex
@@ -194,7 +195,7 @@ class Catmull:
         if len(self.pos):
             return
         for i in range(self.order - 1):
-            for t in range(start=0, stop=1 + self.step, step=self.step):
+            for t in np.arange(0, 1 + self.step, self.step):
                 self.pos.append(self.at(i, t))
 
     def point_at_distance(self, dist):

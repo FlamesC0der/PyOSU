@@ -98,7 +98,7 @@ class MainMenu:
             target_y = (self.game.height - 150) // 2 + (i - self.selected_song_index) * (
                     120 - abs(self.selected_song_index - i) * 5) - self.scroll_offset
             current_y = song.rect.y
-            song.rect.y += min(200, (target_y - current_y) // 5)
+            song.rect.y += (target_y - current_y) // 5
             song.rect.right = self.game.width + 200 + min(5, abs(self.selected_song_index - i)) * 15
 
             if i == self.selected_song_index:
