@@ -19,14 +19,17 @@ class SkinManager:
                 if extension in ["png", "PNG", "jpg", "jpeg"]:
                     self.assets[name] = load_image(
                         os.path.join(ROOT_DIR, f'skins/{self.skin_pack_name}/{asset}'))
-                elif extension in ["mp3", "ogg"]:
-                    self.assets[name] = pygame.mixer.Sound(f"skins/{self.skin_pack_name}/{asset}")
+                elif extension in ["mp3", "ogg", "wav"]:
+                    try:
+                        self.assets[name] = pygame.mixer.Sound(f"skins/{self.skin_pack_name}/{asset}")
+                    except pygame.error:
+                        logger.error(f"Failed to load sound {name}")
 
         logger.info("Loaded skin assets")
 
     def get_skin(self, image_name) -> pygame.Surface | None:
         try:
             return self.assets[image_name]
-        except IndexError as e:
+        except Exception as e:
             logger.error(f"Failed to get skin, {image_name}, \n {e}")
             return None

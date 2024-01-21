@@ -8,6 +8,7 @@ from pyosu.game.utils.fonts import render_text
 from pyosu.game.utils.image_loader import load_image
 from pyosu.game.level import get_levels
 from pyosu.game.core import handle_click
+from pyosu.game.utils.sprites import BackButton
 from pyosu.log import logger
 
 
@@ -28,7 +29,7 @@ class MainMenu:
         self.bottom_buttons = pygame.sprite.Group()
         self.layer_1 = pygame.sprite.Group()
 
-        self.back_button = BackButton(self.layer_1, game=self.game)
+        self.back_button = BackButton(self.layer_1, game=self.game, screen_to_change="IntroScreen")
         self.play_button = PlayButton(self.layer_1, game=self.game)
 
         self.bg = pygame.Surface((self.game.width, self.game.height))
@@ -241,37 +242,6 @@ class BottomButton(pygame.sprite.Sprite):
 
         if self.index == 0:
             self.image.blit(self.mode, (30, 20))
-
-
-class BackButton(pygame.sprite.Sprite):
-    def __init__(self, *groups, game):
-        super().__init__(*groups)
-
-        self.game = game
-
-        self.frames = [self.game.skin_manager.get_skin(f"menu-back-{i}") for i in range(8 + 1)]
-        self.current_frame_index = 0
-        self.frame = 0
-
-        self.image = self.frames[self.current_frame_index]
-        self.image = pygame.transform.scale(self.image, (250, 250))
-
-        self.rect = self.image.get_rect()
-        self.rect.x = 50
-        self.rect.bottom = self.game.height
-
-    def update(self):
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-
-        self.frame += 1
-        if self.frame >= 5:
-            self.current_frame_index = (self.current_frame_index + 1) % len(self.frames)
-            self.frame = 0
-        self.image = self.frames[self.current_frame_index]
-        self.image = pygame.transform.scale(self.image, (250, 250))
-
-        if handle_click(self, mouse_x, mouse_y):
-            self.game.change_screen("IntroScreen")
 
 
 class PlayButton(pygame.sprite.Sprite):

@@ -14,6 +14,7 @@ from pyosu.game.screens.Intro import Intro
 from pyosu.game.screens.IntroScreen import IntroScreen
 from pyosu.game.screens.MainMenu import MainMenu
 from pyosu.game.screens.Level import Level
+from pyosu.game.screens.resultScreen import ResultScreen
 
 
 class Game():
@@ -69,6 +70,8 @@ class Game():
             self.current_screen = self.screens[new_screen]
         elif new_screen == "Level":
             self.current_screen = Level(self, args[0])
+        elif new_screen == "ResultScreen":
+            self.current_screen = ResultScreen(self, args)
         logger.info(f"changed screen to {new_screen}")
 
     def update(self):
@@ -77,7 +80,8 @@ class Game():
     def render(self):
         self.current_screen.render(self.screen)
         self.cursor.update()
-        render_text(self.screen, f"fps: {math.ceil(self.clock.get_fps())}", size=20, position=(10, 20))  # fps
+        render_text(self.screen, f"fps: {math.ceil(self.clock.get_fps())}", size=20,
+                    position=(self.width - 80, 10))  # fps
         pygame.display.flip()
 
     def run(self):
