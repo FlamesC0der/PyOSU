@@ -44,7 +44,7 @@ class ResultScreen:
             if event.key == pygame.K_ESCAPE:
                 self.game.change_screen("MainMenu")
 
-    def update(self):
+    def update(self, events):
         self.layer_1.update()
 
     def render(self, screen: pygame.Surface):

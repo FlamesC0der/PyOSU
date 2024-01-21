@@ -78,7 +78,7 @@ class Level:
         logger.info(f"Level ended. Result: {self.game.score}")
         self.game.change_screen("ResultScreen", self.args, self.game.score)
 
-    def update(self):
+    def update(self, events):
         # mouse_x, mouse_y = pygame.mouse.get_pos()
         current_time = pygame.time.get_ticks() - self.start_time - 5000
 
@@ -133,4 +133,4 @@ class Level:
         render_text(self.screen, f"{self.game.score['accuracy']:.2f}%", font_name="Aller_It", size=30,
                     position=(self.game.width - 150, 60))
         render_text(self.screen, f"{self.game.score['combo']}x", font_name="AllerDisplay", size=50,
-                    position=(20, self.game.height - 20))
+                    position=(20, self.game.height - 45))

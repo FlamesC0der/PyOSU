@@ -84,7 +84,7 @@ class MainMenu:
         self.game.current_music.play(-1)
         self.scroll_offset = 0
 
-    def update(self):
+    def update(self, events):
         mouse_x, mouse_y = pygame.mouse.get_pos()
         current_time = pygame.time.get_ticks()
         keys = pygame.key.get_pressed()
@@ -96,7 +96,7 @@ class MainMenu:
         # handle songs
         for i, song in enumerate(self.song_list.sprites()):
             target_y = (self.game.height - 150) // 2 + (i - self.selected_song_index) * (
-                    120 - abs(self.selected_song_index - i) * 5) - self.scroll_offset
+                    120 - min(5, abs(self.selected_song_index - i)) * 5) - self.scroll_offset
             current_y = song.rect.y
             song.rect.y += (target_y - current_y) // 5
             song.rect.right = self.game.width + 200 + min(5, abs(self.selected_song_index - i)) * 15

@@ -53,8 +53,6 @@ class Circle(pygame.sprite.Sprite):
                      score=0)
 
         if handle_click(self, mouse_x, mouse_y) and not self.animation and not self.clicked:
-            logger.info(f"clicked {self.game.clicked_notes + 1}")
-
             self.clicked = True
             self.game.clicked_notes += 1
             self.game.score["combo"] += 1
@@ -106,8 +104,8 @@ class Slider(pygame.sprite.Sprite):
         self.image = pygame.Surface((self.game.width, self.game.height), pygame.SRCALPHA)
         self.rect = self.image.get_rect()
         self.curve_points = []
-        for t in range(10):
-            self.curve_points.append(self.bezier_curve.at(t / 10))
+        for t in range(15):
+            self.curve_points.append(self.bezier_curve.at(t / 15))
         self.draw_slider()
 
         self.duration = self.end_time - self.start_time
@@ -190,7 +188,7 @@ class Spinner(pygame.sprite.Sprite):
 
         if current_time > self.start_time:
             progress = (current_time - self.start_time) / (self.end_time - self.start_time)
-            scaled_size = max(1, int(100 + (340 * (1 - progress))))
+            scaled_size = max(1, int(100 + (540 * (1 - progress))))
             self.image = pygame.transform.scale(self.approach_circle, (scaled_size, scaled_size))
             self.rect = self.image.get_rect(center=self.rect.center)
         if current_time > self.end_time:

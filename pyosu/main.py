@@ -27,8 +27,8 @@ class Game():
         screen_info = pygame.display.Info()
         self.width, self.height = screen_info.current_w, screen_info.current_h
 
-        # self.screen = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
-        self.screen = pygame.display.set_mode((self.width, self.height), pygame.NOFRAME)
+        self.screen = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
+        # self.screen = pygame.display.set_mode((self.width, self.height), pygame.NOFRAME)
         self.clock = pygame.time.Clock()
         self.skin_manager = SkinManager("boop")
 
@@ -37,7 +37,6 @@ class Game():
 
         self.screens = {"Intro": Intro(self), "IntroScreen": IntroScreen(self), "MainMenu": MainMenu(self)}
         self.current_screen = self.screens["Intro"]
-        # self.current_screen = self.screens["MainMenu"]
 
         pygame.display.set_caption("PyOSU")
         pygame.mouse.set_visible(False)
@@ -46,16 +45,18 @@ class Game():
 
         # Welcome to osu sound
         sound = pygame.mixer.Sound(os.path.join(ROOT_DIR, "game/resources/sounds/welcome.mp3"))
-        sound.play()
+        st = sound.play()
+        while st.get_busy():
+            pygame.time.wait(10)
 
         self.current_music = pygame.mixer.Sound(os.path.join(ROOT_DIR, "game/resources/sounds/circles.mp3"))
         self.current_music.play(-1)
 
         logger.info("Starting game...")
-        logger.info("==========================")
+        logger.info("========PYOSU BY FlamesCoder========")
 
-    def handle_events(self):
-        for event in pygame.event.get():
+    def handle_events(self, events):
+        for event in events:
             if event.type == pygame.QUIT:
                 self.is_Running = False
 
@@ -81,13 +82,14 @@ class Game():
         self.current_screen.render(self.screen)
         self.cursor.update()
         render_text(self.screen, f"fps: {math.ceil(self.clock.get_fps())}", size=20,
-                    position=(self.width - 80, 10))  # fps
+                    position=(self.width - 75, 5))  # fps
         pygame.display.flip()
 
     def run(self):
         while self.is_Running:
-            self.handle_events()
-            self.update()
+            events = pygame.event.get()
+            self.handle_events(events)
+            self.update(events)
             self.render()
 
             self.clock.tick(60)

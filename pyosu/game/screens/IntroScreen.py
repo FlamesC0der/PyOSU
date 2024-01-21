@@ -52,7 +52,7 @@ class IntroScreen:
         self.bg = random.choice(self.bgs)
         self.bg = pygame.transform.scale(self.bg, (self.game.width, self.game.height))
 
-    def update(self):
+    def update(self, events):
         self.game.cursor.show()
         current_time = pygame.time.get_ticks()
 

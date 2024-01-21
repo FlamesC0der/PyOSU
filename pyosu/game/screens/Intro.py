@@ -21,7 +21,7 @@ class Intro:
     def handle_events(self, event):
         pass
 
-    def update(self):
+    def update(self, events):
         self.sprites.update()
 
     def render(self, screen: pygame.Surface):
