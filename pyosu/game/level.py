@@ -6,6 +6,7 @@ import pygame
 from pyosu.game.beatmapparser.main import parse_level
 from pyosu.game.utils.image_loader import load_image
 from pyosu.settings import ROOT_DIR
+from pyosu.log import logger
 
 info_pattern = re.compile(r"^(.+) \((.+)\) \[(.+)]$")
 
@@ -21,10 +22,13 @@ def get_levels() -> list[dict]:
                 "bg": load_image(os.path.join(ROOT_DIR, "game/resources/sprites/standart_background.jpg")),
             }
 
+            logger.info(f"Loading song {level}:")
+
             for file in os.listdir(os.path.join(ROOT_DIR, f"songs/{level}")):
                 if os.path.isfile(os.path.join(ROOT_DIR, f"songs/{level}/{file}")):
                     *_, name, extension = file.rsplit(".")
                     if extension == "osu":  # osu files
+                        logger.info(f"{file}")
                         match = info_pattern.match(name)
                         name, author, difficulty = [match.group(g) for g in range(1, 3 + 1)]
                         new_level["levels"].append(

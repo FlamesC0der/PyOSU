@@ -1,4 +1,5 @@
 import pygame
+import math
 
 from pyosu.game.core import handle_click
 from pyosu.game.beatmapparser.curve import Bezier
@@ -47,10 +48,10 @@ class Circle(pygame.sprite.Sprite):
         if current_time > self.start_time + 200:  # hide if not clicked
             self.game.current_notes += 1
             self.game.score["combo"] = 0
-            self.kill()
             self.game.score["notes_values"]["0"] += 1
             HitImage(self.game.hit_images, game=self.game, pos=(self.rect.centerx, self.rect.centery),
                      score=0)
+            self.kill()
 
         if handle_click(self, mouse_x, mouse_y) and not self.animation and not self.clicked:
             self.clicked = True
@@ -231,8 +232,12 @@ class Spinner(pygame.sprite.Sprite):
         self.rect.centerx = self.game.padding + 50 + 0.5 * (self.game.height - 100)
         self.rect.centery = 100 + 0.5 * (self.game.height - 200)
 
+        self.prev_mouse_pos = None
+        self.angular_speed_threshold = 16
+
     def update(self, current_time, events):
         mouse_x, mouse_y = pygame.mouse.get_pos()
+        keys = pygame.key.get_pressed()
 
         if current_time > self.start_time:
             progress = (current_time - self.start_time) / (self.end_time - self.start_time)
@@ -240,7 +245,20 @@ class Spinner(pygame.sprite.Sprite):
             self.image = pygame.transform.scale(self.approach_circle, (scaled_size, scaled_size))
             self.rect = self.image.get_rect(center=self.rect.center)
         if current_time > self.end_time:
+            self.game.current_notes += 2
             self.kill()
+
+        if pygame.mouse.get_pressed()[0] or keys[pygame.K_z] or keys[pygame.K_x]:
+            if self.prev_mouse_pos:
+                mouse_vector = pygame.math.Vector2(mouse_x - self.prev_mouse_pos[0], mouse_y - self.prev_mouse_pos[1])
+                angle = math.atan2(mouse_vector.y, mouse_vector.x) - math.atan2(1, 0)
+                angle_degrees = math.degrees(angle) % 360
+
+                angular_speed = angle_degrees / (pygame.time.get_ticks() - self.prev_mouse_pos[2])
+
+                if angular_speed > self.angular_speed_threshold:
+                    self.game.score["score"] += 10
+            self.prev_mouse_pos = (mouse_x, mouse_y, pygame.time.get_ticks())
 
         self.image.blit(self.spinner_circle, (self.image.get_width() // 2 - 62.5, self.image.get_height() // 2 - 62.5))
 

@@ -29,7 +29,7 @@ class Level:
 
         self.music_playing = False
         self.music = self.game.current_music = pygame.mixer.Sound(
-            os.path.join(ROOT_DIR, f"songs/{self.args[1]['name']}/{self.data['AudioFilename']}"))
+            os.path.join(ROOT_DIR, f"songs/{self.data['Title']}/{self.data['AudioFilename']}"))
 
         # Sprites
         self.game.padding = (self.game.width - self.game.height) // 2
@@ -133,4 +133,4 @@ class Level:
         render_text(self.screen, f"{self.game.score['accuracy']:.2f}%", font_name="Aller_It", size=30,
                     position=(self.game.width - 150, 60))
         render_text(self.screen, f"{self.game.score['combo']}x", font_name="AllerDisplay", size=50,
-                    position=(20, self.game.height - 45))
+                    position=(20, self.game.height - 55))
