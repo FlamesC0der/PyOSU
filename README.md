@@ -25,13 +25,13 @@
 
 * Install using
 
-```
+```bash
 git clone https://github.com/FlamesC0der/PyOSU.git
 ```
 
 * Install requirements from requirements.txt
 
-```
+```bash
 pip install -r requirements.txt
 ```
 
