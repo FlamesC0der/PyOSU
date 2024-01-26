@@ -17,7 +17,7 @@ from pyosu.game.screens.Level import Level
 from pyosu.game.screens.resultScreen import ResultScreen
 
 
-class Game():
+class Game:
     def __init__(self):
         pygame.init()
         pygame.mixer.init()
@@ -82,7 +82,7 @@ class Game():
         self.current_screen.render(self.screen)
         self.cursor.update()
         render_text(self.screen, f"fps: {math.ceil(self.clock.get_fps())}", size=20,
-                    position=(self.width - 75, 5))  # fps
+                    position=(self.width - 75, 25))  # fps
         pygame.display.flip()
 
     def run(self):
@@ -92,7 +92,7 @@ class Game():
             self.update(events)
             self.render()
 
-            self.clock.tick(60)
+            self.clock.tick(70)
 
 
 if __name__ == "__main__":
