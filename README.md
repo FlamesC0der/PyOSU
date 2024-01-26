@@ -1,15 +1,11 @@
 # PyOSU
 
-<p>Qt project yandex lyceum</p>
+<p>OSU game using Pygame <3</p>
 
 <div id="badges">
   <a href="https://github.com/FlamesC0der/PyOsu/stargazers"><img src="https://img.shields.io/github/stars/FlamesC0der/PyOsu"/></a>
   <a href="https://github.com/FlamesC0der/PyOsu/blob/master/LICENSE"><img src="https://img.shields.io/github/license/FlamesC0der/PyOsu?color=red"/></a>
 </div>
-
-##
-
-<p>OSU game using Pygame <3</p>
 
 ## Features
 
