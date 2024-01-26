@@ -23,7 +23,7 @@
 * Open Source code
 
 ## Docs
-Soon...
+[RUDESCRIPTION](https://github.com/FlamesC0der/PyOSU/blob/master/docs/RUDESCRIPTION.md)
 
 ## Installation
 
