@@ -22,8 +22,6 @@ def get_levels() -> list[dict]:
                 "bg": load_image(os.path.join(ROOT_DIR, "game/resources/sprites/standart_background.jpg")),
             }
 
-            logger.info(f"Loading song {level}:")
-
             for file in os.listdir(os.path.join(ROOT_DIR, f"songs/{level}")):
                 if os.path.isfile(os.path.join(ROOT_DIR, f"songs/{level}/{file}")):
                     *_, name, extension = file.rsplit(".")

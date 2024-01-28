@@ -23,7 +23,7 @@ class SkinManager:
                     try:
                         self.assets[name] = pygame.mixer.Sound(f"skins/{self.skin_pack_name}/{asset}")
                     except pygame.error:
-                        logger.error(f"Failed to load sound {name}")
+                        logger.warning(f"Failed to load sound {name}")
 
         logger.info("Loaded skin assets")
 
