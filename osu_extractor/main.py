@@ -25,13 +25,18 @@ class OsuExtractor(QMainWindow, Ui_MainWindow):
 
         if dialog_status == 1:
             file = dialog.selectedFiles()[0]
-            file_data = file.split("/")[-1].split(".")
+            file_data = file.split("/")[-1].rsplit(".")
             try:
                 with zipfile.ZipFile(file, "r") as osz_file:
-                    if file_data[1] == "osz":
-                        osz_file.extractall(f"../pyosu/songs/{' '.join(file_data[0].split(' ')[1:]).split(' - ')[1]}")
+                    if file_data[1] == "osk":
+                        osz_file.extractall(f"../pyosu/skins/{' '.join(file_data[0].split(' ')[1:])}")
                     else:
-                        osz_file.extractall(f"../pyosu/skins/{' '.join(file_data[0].split(' ')[1:]).split(' - ')[1]}")
+                        d = ' '.join(file_data[0].split(' ')[1:])
+                        if " - " in d:
+                            osz_file.extractall(f"../pyosu/songs/{' '.join(file_data[0].split(' ')[1:]).split(' - ')[1]}")
+                        else:
+                            osz_file.extractall(
+                                f"../pyosu/songs/{' '.join(file_data[0].split(' ')[1:])}")
                 self.status.setText(f"Successfully added {' '.join(file_data[0].split(' ')[1:])}!")
             except zipfile.BadZipFile:
                 self.status.setText(f"Something went wrong!")

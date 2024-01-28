@@ -30,7 +30,7 @@ class Level:
         self.music_playing = False
         self.music = self.game.current_music = pygame.mixer.Sound(
             os.path.join(ROOT_DIR, f"songs/{self.data['Title']}/{self.data['AudioFilename']}"))
-        self.music.set_volume(0.1)
+        self.music.set_volume(0.5)
 
         # Sprites
         self.game.padding = (self.game.width - self.game.height) // 2

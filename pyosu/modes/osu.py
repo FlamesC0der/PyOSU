@@ -34,7 +34,7 @@ class Circle(pygame.sprite.Sprite):
 
         if current_time > self.start_time - 500:  # show before animation
             progress = (self.start_time - current_time) / 500
-            scaled_size = int(128 + (175 * progress))
+            scaled_size = max(0, int(128 + (175 * progress)))
 
             self.image = pygame.transform.scale(self.approach_circle, (scaled_size, scaled_size))
             self.rect = self.image.get_rect(center=self.rect.center)
