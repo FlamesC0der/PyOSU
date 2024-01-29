@@ -76,6 +76,7 @@ class Game:
         logger.info(f"changed screen to {new_screen}")
 
     def update(self, events):
+        self.current_music.set_volume(0.5)
         self.current_screen.update(events)
 
     def render(self):
