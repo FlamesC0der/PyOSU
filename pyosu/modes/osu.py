@@ -7,13 +7,15 @@ from pyosu.log import logger
 
 
 class Circle(pygame.sprite.Sprite):
-    def __init__(self, *groups, game, pos, start_time):
+    def __init__(self, *groups, game, data):
         super().__init__(*groups)
 
         self.game = game
-        self.pos = pos
-        self.start_time = start_time
+        self.data = data
         self.type = "circle"
+
+        self.position = data['position']
+        self.start_time = data['startTime']
 
         self.approach_circle = self.game.skin_manager.get_skin("approachcircle")
         self.hit_circle = self.game.skin_manager.get_skin("hitcircle")
@@ -21,8 +23,8 @@ class Circle(pygame.sprite.Sprite):
         self.image = self.approach_circle.copy()
 
         self.rect = self.image.get_rect()
-        self.rect.centerx = self.game.padding + 50 + (self.pos[0] / 512) * (self.game.height - 100)
-        self.rect.centery = 100 + (self.pos[1] / 512) * (self.game.height - 200)
+        self.rect.centerx = self.game.padding + 50 + (self.position[0] / 512) * (self.game.height - 100)
+        self.rect.centery = 100 + (self.position[1] / 512) * (self.game.height - 200)
 
         self.click_sound = self.game.skin_manager.get_skin("soft-hitnormal")
 

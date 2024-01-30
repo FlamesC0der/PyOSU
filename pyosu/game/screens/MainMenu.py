@@ -8,7 +8,7 @@ from pyosu.game.utils.fonts import render_text
 from pyosu.game.utils.image_loader import load_image
 from pyosu.game.level import get_levels
 from pyosu.game.core import handle_click
-from pyosu.game.utils.sprites import BackButton
+from pyosu.game.utils.sprites import BackButton, Text
 from pyosu.log import logger
 
 

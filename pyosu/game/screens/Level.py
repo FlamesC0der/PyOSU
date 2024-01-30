@@ -2,7 +2,7 @@ import pygame
 import os
 
 from pyosu.settings import ROOT_DIR
-from pyosu.game.utils.fonts import render_text
+from pyosu.game.utils.fonts import render_text, get_text
 from pyosu.game.utils.image_loader import load_image
 from pyosu.game.core import handle_click
 from pyosu.log import logger
@@ -92,8 +92,7 @@ class Level:
                     Circle(
                         self.circles_sprites,
                         game=self.game,
-                        pos=tuple(object["position"]),
-                        start_time=object["startTime"]
+                        data=object
                     )
                 elif object["object_name"] == "slider":
                     Slider(
