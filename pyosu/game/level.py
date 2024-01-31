@@ -12,6 +12,7 @@ info_pattern = re.compile(r"^(.+) \((.+)\) \[(.+)]$")
 
 
 def get_levels() -> list[dict]:
+    logger.info("Loading Levels")
     levels = []
     for level in os.listdir(os.path.join(ROOT_DIR, "songs")):
         if os.path.isdir(os.path.join(ROOT_DIR, f"songs/{level}")):
@@ -40,4 +41,5 @@ def get_levels() -> list[dict]:
                     elif extension in ["png", "PNG", "jpg", "jpeg"]:  # images
                         new_level["bg"] = load_image(os.path.join(ROOT_DIR, f"songs/{level}/{file}"))
             levels.append(new_level)
+    logger.info("All levels loaded!")
     return levels

@@ -167,6 +167,7 @@ class MainMenu:
             if i == self.selected_song_index:
                 render_text(self.screen, song.name, "Aller_Lt", 30, (50, 10))
                 render_text(self.screen, f"Mapped by {song.author}", "Aller_Lt", 20, (50, 40))
+                break
 
 
 class Song(pygame.sprite.Sprite):
