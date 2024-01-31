@@ -1,3 +1,6 @@
+# Copyright (c) FlamesCoder. Licensed under the MIT Licence.
+# See the LICENCE file in the repository root for full licence text.
+
 # Form implementation generated from reading ui file 'ui.ui'
 #
 # Created by: PyQt6 UI code generator 6.5.2
