@@ -5,6 +5,7 @@
 <div id="badges">
   <a href="https://github.com/FlamesC0der/PyOsu/stargazers"><img src="https://img.shields.io/github/stars/FlamesC0der/PyOsu"/></a>
   <a href="https://github.com/FlamesC0der/PyOsu/blob/master/LICENSE"><img src="https://img.shields.io/github/license/FlamesC0der/PyOsu?color=red"/></a>
+  <a href=""><img src="https://wakatime.com/badge/user/018bd4cf-9224-4729-b4f3-31fc6a93ca34/project/018ceea1-ce6d-488b-bfe7-6dfb8db64afc.svg"></a>
 </div>
 
 ## Features
