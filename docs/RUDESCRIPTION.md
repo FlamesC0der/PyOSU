@@ -2,6 +2,8 @@
 
 PyOsu - игра [OSU](https://en.wikipedia.org/wiki/Osu!) на pygame.
 
+[presentation](../docs/presentation.key)
+
 ## ScreenShots
 
 * IntroMenu
